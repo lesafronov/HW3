@@ -1,0 +1,161 @@
+Sh:
+        pushq   %rbp
+        movq    %rsp, %rbp
+        pushq   %rbx
+        subq    $24, %rsp
+        movsd   %xmm0, -24(%rbp)
+        movq    -24(%rbp), %rax
+        movq    %rax, %xmm0
+        call    exp
+        movq    %xmm0, %rbx
+        movsd   -24(%rbp), %xmm0
+        movq    .LC0(%rip), %xmm1
+        xorpd   %xmm1, %xmm0
+        movq    %xmm0, %rax
+        movq    %rax, %xmm0
+        call    exp
+        movapd  %xmm0, %xmm1
+        movq    %rbx, %xmm0
+        subsd   %xmm1, %xmm0
+        movsd   .LC1(%rip), %xmm1
+        divsd   %xmm1, %xmm0
+        movq    %xmm0, %rax
+        movq    %rax, %xmm0
+        movq    -8(%rbp), %rbx
+        leave
+        ret
+Factorial:
+        pushq   %rbp
+        movq    %rsp, %rbp
+        subq    $16, %rsp
+        movl    %edi, -4(%rbp)
+        cmpl    $1, -4(%rbp)
+        je      .L4
+        cmpl    $0, -4(%rbp)
+        jne     .L5
+.L4:
+        movl    $1, %eax
+        jmp     .L6
+.L5:
+        movl    -4(%rbp), %eax
+        subl    $1, %eax
+        movl    %eax, %edi
+        call    Factorial
+        imull   -4(%rbp), %eax
+.L6:
+        leave
+        ret
+PowerSeries:
+        pushq   %rbp
+        movq    %rsp, %rbp
+        pushq   %rbx
+        subq    $40, %rsp
+        movl    %edi, -36(%rbp)
+        movsd   .LC2(%rip), %xmm0
+        movsd   %xmm0, -24(%rbp)
+        movl    $1, -28(%rbp)
+        jmp     .L8
+.L9:
+        pxor    %xmm0, %xmm0
+        cvtsi2sdl       -28(%rbp), %xmm0
+        pxor    %xmm3, %xmm3
+        cvtsi2sdl       -36(%rbp), %xmm3
+        movq    %xmm3, %rax
+        movapd  %xmm0, %xmm1
+        movq    %rax, %xmm0
+        call    pow
+        movq    %xmm0, %rbx
+        movl    -28(%rbp), %eax
+        movl    %eax, %edi
+        call    Factorial
+        pxor    %xmm1, %xmm1
+        cvtsi2sdl       %eax, %xmm1
+        movq    %rbx, %xmm0
+        divsd   %xmm1, %xmm0
+        movsd   -24(%rbp), %xmm1
+        addsd   %xmm1, %xmm0
+        movsd   %xmm0, -24(%rbp)
+        pxor    %xmm0, %xmm0
+        cvtsi2sdl       -28(%rbp), %xmm0
+        movl    -36(%rbp), %eax
+        negl    %eax
+        pxor    %xmm4, %xmm4
+        cvtsi2sdl       %eax, %xmm4
+        movq    %xmm4, %rax
+        movapd  %xmm0, %xmm1
+        movq    %rax, %xmm0
+        call    pow
+        movq    %xmm0, %rbx
+        movl    -28(%rbp), %eax
+        movl    %eax, %edi
+        call    Factorial
+        pxor    %xmm0, %xmm0
+        cvtsi2sdl       %eax, %xmm0
+        movq    %rbx, %xmm1
+        divsd   %xmm0, %xmm1
+        movsd   -24(%rbp), %xmm0
+        subsd   %xmm1, %xmm0
+        movsd   %xmm0, -24(%rbp)
+        addl    $1, -28(%rbp)
+.L8:
+        pxor    %xmm5, %xmm5
+        cvtsi2sdl       -36(%rbp), %xmm5
+        movq    %xmm5, %rax
+        movq    %rax, %xmm0
+        call    Sh
+        movapd  %xmm0, %xmm1
+        movsd   -24(%rbp), %xmm0
+        divsd   %xmm1, %xmm0
+        movsd   .LC1(%rip), %xmm2
+        movapd  %xmm0, %xmm1
+        divsd   %xmm2, %xmm1
+        movsd   .LC2(%rip), %xmm0
+        subsd   %xmm1, %xmm0
+        comisd  .LC3(%rip), %xmm0
+        ja      .L9
+        movsd   -24(%rbp), %xmm0
+        movsd   .LC1(%rip), %xmm1
+        divsd   %xmm1, %xmm0
+        movq    %xmm0, %rax
+        movq    %rax, %xmm0
+        movq    -8(%rbp), %rbx
+        leave
+        ret
+.LC4:
+        .string "%d"
+.LC5:
+        .string "%f"
+main:
+        pushq   %rbp
+        movq    %rsp, %rbp
+        subq    $16, %rsp
+        leaq    -4(%rbp), %rax
+        movq    %rax, %rsi
+        movl    $.LC4, %edi
+        movl    $0, %eax
+        call    __isoc99_scanf
+        movl    -4(%rbp), %eax
+        movl    %eax, %edi
+        call    PowerSeries
+        movq    %xmm0, %rax
+        movq    %rax, %xmm0
+        movl    $.LC5, %edi
+        movl    $1, %eax
+        call    printf
+        movl    $0, %eax
+        leave
+        ret
+.LC0:
+        .long   0
+        .long   -2147483648
+        .long   0
+        .long   0
+.LC1:
+        .long   0
+        .long   1073741824
+.LC2:
+        .long   0
+        .long   1072693248
+.LC3:
+        .long   -755914244
+        .long   1062232653
